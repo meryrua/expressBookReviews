@@ -57,15 +57,33 @@ regd_users.post("/login", (req,res) => {
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
+    //console.log(" put /auth/review/:isbn ");
     const isbn = req.params.isbn;
     const review = req.query.review;
     let username = req.session.authorization.username;
-    console.log(" /auth/review/:isbn " + isbn + " " + review + " " + username);
-    console.log("before " + JSON.stringify(books[isbn]['reviews'], null, 2))
+    //console.log(" /auth/review/:isbn " + isbn + " " + review + " " + username);
+    //console.log("before " + JSON.stringify(books[isbn]['reviews'], null, 2))
     let reviewThisUser = books[isbn]['reviews'][username];
     books[isbn]['reviews'][username] = review;
-    console.log("after " + JSON.stringify(books[isbn]['reviews'], null, 2))
+    //console.log("after " + JSON.stringify(books[isbn]['reviews'], null, 2))
     return res.status(200).send("Review for book with isbn " + isbn + " added");
+});
+
+// Delete a book review
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    const isbn = req.params.isbn;
+    let username = req.session.authorization.username;
+    //console.log("username " + username + " before " + JSON.stringify(books[isbn]['reviews'], null, 2));
+    let reviewsAll = {};
+    for (const key in books[isbn]['reviews']) {
+        if (key !== username) {
+            reviewsAll[key] = books[isbn]['reviews'][key];
+        }
+    }
+    //console.log("new reviews" + JSON.stringify(reviewsAll, null, 2));
+    books[isbn]['reviews'] = reviewsAll;
+    //console.log("after " + JSON.stringify(books[isbn]['reviews'], null, 2))
+    return res.status(200).send("Review for book with isbn " + isbn + " deleted");
 });
 
 module.exports.authenticated = regd_users;
